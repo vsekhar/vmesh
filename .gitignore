@@ -11,9 +11,6 @@
 
 *.log
 
-# Access credentials
-CREDENTIALS.py
-
 # editor files
 *~
 
