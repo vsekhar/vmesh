@@ -20,10 +20,16 @@ if __name__ == '__main__':
 			print(host.name, host['timestamp'])
 		exit(0)
 
+	# space out remote instances so they don't all hit the DB at the same time
+	if not args.get('local'):
+		import time
+		time.sleep(random.randint(0,5))
+
 	if args.get('reset'):
 		peers.clear_hosts()
 
 	# management intervals
+	config_check_time = time.time()
 	peer_mgmt_time = time.time()
 	kernel_time = time.time()
 	checkpoint_time = time.time()
@@ -40,10 +46,19 @@ if __name__ == '__main__':
 
 			cur_time = time.time()
 
-			# update configuration
-			# at a random interval within a specified range
-			# ping SDB for a new config, if version is greater than current,
-			# get it, and broadcast the new version number
+			# randomly check for updated configuration every 5-60 seconds and
+			# broadcast if found
+			if cur_time - config_check_time > random.randint(5,60):
+				pass
+				# if version > args.config_current_version:
+				# get newest version, then args.update_config(data, new_version)
+
+
+			# update configuration if one is pending
+			if args.config_latest_version > args.config_current_version:
+				# fetch from SDB/S3
+				pass
+
 
 			# kernel processing
 			if cur_time - kernel_time > args.get('kernel_interval'):
