@@ -18,10 +18,7 @@
 .sconsign
 .sconsign.dblite
 
-# Be sure to include gitignore eventhough it is a dot file
+# Dot files, but include .gitignore
+.*
 !.gitignore
-
-# build directories
-Debug/
-Release/
 
