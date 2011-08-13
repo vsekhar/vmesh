@@ -3,6 +3,8 @@ debug = True
 log = 'vmesh.log'
 sdb_domain = 'vmesh'
 
+### ^^^ above values should not change during a run ^^^ ###
+
 connections = 3 ; connections to peers to try and maintain
 peer_entry_lifetime = 120 ; seconds a peer entry should remain in sdb
 
