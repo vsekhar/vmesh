@@ -15,12 +15,12 @@ def random_string(length = 8):
 	return ''.join([random.choice(string.letters + string.digits) for _ in range(length)])
 
 if __name__ == '__main__':
-	if args.list:
+	if args.get('list'):
 		for host in peers.hosts():
 			print(host.name, host['timestamp'])
 		exit(0)
 
-	if args.reset:
+	if args.get('reset'):
 		peers.clear_hosts()
 
 	# management intervals
@@ -41,7 +41,7 @@ if __name__ == '__main__':
 			cur_time = time.time()
 
 			# kernel processing
-			if cur_time - kernel_time > args.kernel_interval:
+			if cur_time - kernel_time > args.get('kernel_interval'):
 				try:
 					random_id = random.choice(list(peers.connections.keys()))
 					connection = peers.connections[random_id]
@@ -54,11 +54,11 @@ if __name__ == '__main__':
 					kernel_time = cur_time
 
 			# peer processing
-			if cur_time - peer_mgmt_time > args.peer_mgmt_interval:
+			if cur_time - peer_mgmt_time > args.get('peer_mgmt_interval'):
 				peer_mgmt_time = cur_time
 				peers.top_up()
 				peers.update_node()
-				if args.debug:
+				if args.get('debug'):
 					s = 'connections: '
 					for c in peers.connections.values():
 						s += c.peer_id + ' '
@@ -66,13 +66,13 @@ if __name__ == '__main__':
 					log.debug(s)
 
 			# checkpoint
-			if cur_time - checkpoint_time > args.checkpoint_interval:
+			if cur_time - checkpoint_time > args.get('checkpoint_interval'):
 				# do checkpoint (stopping the kernel?)
 				# tell kernels to checkpoint themselves?
 				pass
 
 			# clean-up
-			if cur_time - clean_up_time > args.clean_up_interval:
+			if cur_time - clean_up_time > args.get('clean_up_interval'):
 				peers.purge_old_peers()
 	except KeyboardInterrupt:
 		pass
