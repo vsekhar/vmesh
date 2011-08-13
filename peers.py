@@ -1,72 +1,14 @@
 import asyncore
-import datetime
-import pickle
 import socket
-
-from asynchat import async_chat
-
-from logger import log
-import args
-import aws
 import random
 
-class Message:
-	def __init__(self, cmd, payload=None):
-		self.cmd = cmd
-		self.payload = payload
+from logger import log
+from baseconnectionhandler import BaseConnectionHandler, poll
+import args
+import aws
 
-	def __str__(self):
-		return 'Message(%s, %s)' % (self.cmd, self.payload)
-
-#
-# Handles basic message communication, and timestamping
-# Requires sub-class to overload dispatch() for actual processing
-#
-class BaseConnectionHandler(async_chat):
-
-	COMMAND_TERMINATOR = b'\n'
-
-	def __init__(self, socket):
-		async_chat.__init__(self, sock=socket)
-		self.set_terminator(self.COMMAND_TERMINATOR)
-		self.ibuffer=[]
-		self.update_timestamp()
-
-	def collect_incoming_data(self, data):
-		self.ibuffer.append(data)
-
-	def found_terminator(self):
-		data = b''.join(self.ibuffer)
-		self.ibuffer = []
-		if isinstance(self.get_terminator(), int):
-			# process binary, reset for ascii length parameter
-			self.dispatch(pickle.loads(data))
-			self.set_terminator(self.COMMAND_TERMINATOR)
-
-		else:
-			# start collecting binary
-			length = int(data.decode('ascii').strip())
-			self.set_terminator(length)
-
-	def handle_write(self):
-		async_chat.handle_write(self)
-		self.update_timestamp()
-
-	def handle_read(self):
-		async_chat.handle_read(self)
-		self.update_timestamp()
-
-	def update_timestamp(self):
-		self.timestamp = datetime.datetime.utcnow()
-
-	def send_msg(self, cmd, payload=None):
-		data = pickle.dumps(Message(cmd=cmd, payload=payload))
-		msg_hdr = str(len(data))
-		msg_hdr = msg_hdr.encode('ascii') + self.COMMAND_TERMINATOR
-		self.push(msg_hdr + data)
-
-connections = {}
-unknown_connections = set()
+connections = {} # format: {'peer_id': <connection_obj>}
+unknown_connections = set() # format: {<connection_obj>}
 
 #
 # Handles id tracking, command dispatching and authentication
@@ -96,10 +38,14 @@ class ConnectionHandler(BaseConnectionHandler):
 		unknown_connections.discard(self)
 		self.send_msg('id_ack')
 
+	###################################################
+	# Protocol commands
+	###################################################
+
 	def my_id_is(self, payload):
 		self.peer_id = payload
 		if self.peer_id == node_id:
-			log.warning('self-connection detected: dropping')
+			log.debug('self-connection detected: dropping')
 			self.close_when_done()
 		elif self.peer_id in connections:
 			"""
@@ -133,11 +79,23 @@ class ConnectionHandler(BaseConnectionHandler):
 	def kernel(self, payload):
 		log.debug('kernel message received: %s' % payload)
 
+	def new_config(self, new_version):
+		if args.new_config_available(new_version):
+			broadcast_new_config(new_version)
+
+	def config_version(self, _):
+		self.send_msg('my_config_version', args.config_current_version)
+
+	###################################################
+	# Command registration and dispatching
+	###################################################
 	command_table = {
 		'my_id_is': my_id_is,
 		'id_ack': id_ack,
 		'hello': hello,
-		'kernel': kernel
+		'kernel': kernel,
+		'new_config': new_config,
+		'config_version': config_version
 	}
 
 	def dispatch(self, msg):
@@ -145,7 +103,12 @@ class ConnectionHandler(BaseConnectionHandler):
 		try:
 			self.command_table[msg.cmd](self, msg.payload)
 		except KeyError:
-			log.error('Received invalid command: %s' % msg.cmd)
+			msg = 'Received invalid command \'%s\' from ' % msg.cmd
+			if self.peer_id:
+				msg += self.peer.id
+			else:
+				msg += 'unknown peer'
+			log.warning(msg)
 
 class ServerSocket(asyncore.dispatcher):
     def __init__(self, bind_address='', port=0):
@@ -164,12 +127,11 @@ class ServerSocket(asyncore.dispatcher):
     def handle_close(self):
         self.close()
 
-poll = asyncore.poll
 serversocket = ServerSocket()
 hostname = aws.metadata['public-hostname']
 node_id = hostname + ':' + str(serversocket.port)
 log.info('Node ID: %s' % node_id)
-sdb_domain = aws.get_sdb_domain(args.get('sdb_domain'))
+sdb_domain = aws.get_sdb_domain()
 
 def new_connection(id):
 	addr,_,port = id.partition(':')
@@ -224,13 +186,16 @@ def purge_old_peers(lifetime=int(args.get('peer_entry_lifetime'))):
 			break # hosts are sorted oldest-first
 
 def update_node():
-	dom = aws.get_sdb_domain(args.get('sdb_domain'))
-	record = dom.get_item(node_id)
+	record = sdb_domain.get_item(node_id)
 	if record is None:
-		record = dom.new_item(node_id)
+		record = sdb_domain.new_item(node_id)
 	import time
 	cur_time = time.time()
 	record['timestamp'] = cur_time
 	record.save()
-	
+
+def broadcast_new_config(new_version):
+	for conn in connections.values():
+		conn.send_msg(cmd='new_config', payload=new_version)
+
 
