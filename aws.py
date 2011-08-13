@@ -1,7 +1,7 @@
 import boto
 import args
 
-if args.local:
+if args.get('local'):
 	metadata = {'public-hostname': 'localhost',
 				'ami-launch-index': 0,
 				'ami-id': 'ami-localdebug'}
@@ -11,10 +11,10 @@ else:
 
 def get_sdb_domain(domain):
 	global args
-	if args.local:
+	if args.get('local'):
 		sdb = boto.connect_sdb()
 	else:
-		sdb = boto.connect_sdb(args.access_key, args.secret_key)
+		sdb = boto.connect_sdb(args.get('access_key'), args.get('secret_key'))
 	dom = sdb.lookup(domain)
 	if dom is None:
 		dom = sdb.create_domain(domain)
@@ -22,10 +22,10 @@ def get_sdb_domain(domain):
 
 def get_s3_bucket(bucket):
 	global args
-	if args.local:
+	if args.get('local'):
 		s3conn = boto.connect_s3()
 	else:
-		s3conn = boto.connect_s3(args.access_key, args.secret_key)
+		s3conn = boto.connect_s3(args.get('access_key'), args.get('secret_key'))
 	bucket = s3conn.get_bucket(bucket)
 	if bucket is None:
 		bucket = s3conn.create_bucket(bucket)

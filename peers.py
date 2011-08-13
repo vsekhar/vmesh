@@ -8,6 +8,7 @@ from asynchat import async_chat
 from logger import log
 import args
 import aws
+import random
 
 class Message:
 	def __init__(self, cmd, payload=None):
@@ -168,7 +169,7 @@ serversocket = ServerSocket()
 hostname = aws.metadata['public-hostname']
 node_id = hostname + ':' + str(serversocket.port)
 log.info('Node ID: %s' % node_id)
-sdb_domain = aws.get_sdb_domain(args.sdb_domain)
+sdb_domain = aws.get_sdb_domain(args.get('sdb_domain'))
 
 def new_connection(id):
 	addr,_,port = id.partition(':')
@@ -178,7 +179,7 @@ def new_connection(id):
 	ConnectionHandler(socket=sock, server=serversocket, id=id) # outgoing connection
 
 def hosts(ascending=False):
-	query_string = 'SELECT timestamp FROM %s WHERE timestamp is not null ORDER BY timestamp ' % args.sdb_domain
+	query_string = 'SELECT timestamp FROM %s WHERE timestamp is not null ORDER BY timestamp ' % args.get('sdb_domain')
 	query_string += 'ASC' if ascending else 'DESC'
 	q = sdb_domain.select(query_string)
 	for host in q:
@@ -189,7 +190,7 @@ def clear_hosts():
 		host.delete()
 
 def top_up():
-	deficit = int(args.connections) - len(connections)
+	deficit = int(args.get('connections')) - len(connections)
 	if deficit > 0:
 		count = 0
 		for host in hosts():
@@ -212,7 +213,7 @@ def print_peers():
 	for host in hosts():
 		print(host.name, cur_time - float(host['timestamp']))
 
-def purge_old_peers(lifetime=int(args.peer_entry_lifetime)):
+def purge_old_peers(lifetime=int(args.get('peer_entry_lifetime'))):
 	import time
 	cur_time = time.time()
 	oldest_time = cur_time - lifetime
@@ -223,7 +224,7 @@ def purge_old_peers(lifetime=int(args.peer_entry_lifetime)):
 			break # hosts are sorted oldest-first
 
 def update_node():
-	dom = aws.get_sdb_domain(args.sdb_domain)
+	dom = aws.get_sdb_domain(args.get('sdb_domain'))
 	record = dom.get_item(node_id)
 	if record is None:
 		record = dom.new_item(node_id)

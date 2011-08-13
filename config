@@ -1,29 +1,17 @@
-###############################################
-# Parameters associated with the mesh network
-###############################################
+[DEFAULT]
+debug = True
+log = 'vmesh.log'
 
-# Debug (comment out to switch off)
---debug
+connections = 3 ; connections to peers to try and maintain
+sdb_domain = 'vmesh'
 
-# Number of connections to try and maintain
---connections=3
-
-# SDB domain to track mesh metadata
---sdb-domain=vmesh
-
-# Amount of time peer entries should stay in SDB (seconds)
---peer-entry-lifetime=120
+peer_entry_lifetime = 120 ; seconds a peer entry should remain in sdb
 
 # Service intervals (seconds)
---peer-mgmt-interval=3
---kernel-interval=3
---checkpoint-interval=120
---clean-up-interval=30
+peer_mgmt_interval = 3
+kernel_interval = 3
+checkpoint_interval = 120
+clean_up_interval = 30
 
-# Number of kernel processes to run (default is cpu_count * 2)
-# --kernel_processes=4
-
-#############################################
-# Parameters associated with the run kernel
-#############################################
+kernel_processes = 4
 
