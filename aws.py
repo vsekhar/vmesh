@@ -9,8 +9,10 @@ else:
 	import boto.utils
 	metadata = boto.utils.get_instance_metadata()
 
-def get_sdb_domain(domain):
+def get_sdb_domain(domain=None):
 	global args
+	if not domain:
+		domain = args.get('sdb_domain')
 	if args.get('local'):
 		sdb = boto.connect_sdb()
 	else:
