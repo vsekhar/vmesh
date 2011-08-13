@@ -40,8 +40,9 @@ logging.getLogger('boto').setLevel(logging.WARNING)
 
 # announce startup
 log.info('### Vmesh starting (python %d.%d.%d, timestamp %d) ###' % (sys.version_info[:3] + (time.time(),)))
+log.debug('Launched with sys.argv = %s', str(args.safeargv))
+log.debug('Working directory: %s' % os.getcwd())
+log.info('Logging to: %s' % logfilepath)
 if args.get('debug'):
 	log.info('Debug logging mode enabled')
-log.debug('Working directory: %s' % os.getcwd())
-log.debug('sys.argv: %s', str(sys.argv))
 
