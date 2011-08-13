@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 import os
 from cStringIO import StringIO
 from sys import argv
