@@ -1,8 +1,8 @@
 import os
+import ConfigParser
 from cStringIO import StringIO
 from sys import argv
 from argparse import ArgumentParser, SUPPRESS
-from ConfigParser import SafeConfigParser
 from ast import literal_eval
 
 # create safe argv (for logging, etc.)
@@ -44,16 +44,26 @@ def new_config_available(new_version):
 	global config_current_version, config_latest_version
 	if new_version > config_current_version and new_version > config_latest_version: 
 		config_latest_version = new_version
+		return True
+	return False
 
 def update_config(data, version, initial=False):
 	global config, config_current_version, config_latest_version
 	if initial or version > config_current_version:
-		config = SafeConfigParser()
-		config.readfp(StringIO(data))
-		config_current_version = version
+		try:
+			new_config = ConfigParser.SafeConfigParser()
+			new_config.readfp(StringIO(data))
+			config = new_config
+			config_current_version = version
+		except ConfigParser.Error:
+			# stop trying to load this config (attempts are restarted after polling interval)
+			config_latest_version = config_current_version
 
-	# update if greater than latest version ever seen
-	config_latest_version = max(version, config_latest_version)
+			from logger import log # must be deferred b/c logger uses args
+			log.warning('Error loading config version %d, reverting to config version %d' % (version, config_current_version))
+		else:
+			# update if greater than latest version ever seen
+			config_latest_version = max(version, config_latest_version)
 
 initial_config_data = ''.join(open(parsed_args.config_file, 'rt').readlines())
 update_config(data=initial_config_data, version=0, initial=True)
