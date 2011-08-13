@@ -40,6 +40,11 @@ if __name__ == '__main__':
 
 			cur_time = time.time()
 
+			# update configuration
+			# at a random interval within a specified range
+			# ping SDB for a new config, if version is greater than current,
+			# get it, and broadcast the new version number
+
 			# kernel processing
 			if cur_time - kernel_time > args.get('kernel_interval'):
 				try:

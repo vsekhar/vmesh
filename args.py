@@ -1,30 +1,32 @@
 #!/usr/bin/env python
 
-import argparse
-import ConfigParser
-import sys
 import os
-import ast
+from cStringIO import StringIO
+from sys import argv
+from argparse import ArgumentParser, SUPPRESS
+from ConfigParser import SafeConfigParser
+from ast import literal_eval
 
 # create safe argv (for logging, etc.)
+hidden_arguments = set(['--access-key', '--secret-key'])
 def hider(x):
-	if x.startswith('--access-key') or x.startswith('--secret-key'):
-		return x.partition('=')[0] + '=[hidden]'
-	else:
-		return x
-safeargv = list(map(hider, sys.argv))
+	for arg in hidden_arguments:
+		if x.startswith(arg):
+			return x.partition('=')[0] + '=[hidden]'
+	return x
+safeargv = list(map(hider, argv))
 
 # parse command line
-parser = argparse.ArgumentParser(description='vmesh-launch.py: initial package script')
-parser.add_argument('-c', '--config-file', type=str, help='config file (default=\'config\')')
-parser.add_argument('-l', '--local', default=False, action='store_true', help='run in local/debug mode (no AWS metadata, implies --interactive)')
-parser.add_argument('--log', type=str, default='vmesh.log', help='log file')
-parser.add_argument('-i', '--interactive', default=False, action='store_true', help='interactive (don\' redirect console to logfile)')
-parser.add_argument('-d', '--debug', default=False, action='store_true', help='debug (print more output)')
-parser.add_argument('--list', default=False, action='store_true', help='list hosts and exit (do not register this host)')
-parser.add_argument('-r', '--reset', default=False, action='store_true', help='reset metadata at startup')
+parser = ArgumentParser(description='vmesh-launch.py: initial package script')
 parser.add_argument('--access-key', type=str, help='access key')
 parser.add_argument('--secret-key', type=str, help='secret key')
+parser.add_argument('-c', '--config-file', type=str, help='config file (default=\'config\')')
+parser.add_argument('-l', '--local', default=False, action='store_true', help='run in local/debug mode (no AWS metadata, implies --interactive)')
+parser.add_argument('-i', '--interactive', default=False, action='store_true', help='interactive (don\' redirect console to logfile)')
+parser.add_argument('--list', default=False, action='store_true', help='list hosts and exit (do not register this host)')
+parser.add_argument('-r', '--reset', default=False, action='store_true', help='reset metadata at startup')
+parser.add_argument('-d', '--debug', default=SUPPRESS, action='store_true', help='debug (print more output)')
+parser.add_argument('--log', type=str, default=SUPPRESS, help='log file')
 parsed_args = parser.parse_args()
 
 if parsed_args.local:
@@ -36,14 +38,36 @@ if not parsed_args.config_file:
 	else:
 		parsed_args.config_file = os.path.join(os.path.dirname(__file__), 'config')
 
-config = ConfigParser.SafeConfigParser()
-config.read(parsed_args.config_file)
+config_current_version = 0
+config_latest_version = 0
+
+def new_config_available(new_version):
+	""" Register that a new config is available (monotonically increasing version number) """
+	global config_current_version, config_latest_version
+	if new_version > config_current_version and new_version > config_latest_version: 
+		config_latest_version = new_version
+
+def update_config(data, version, initial=False):
+	global config, config_current_version, config_latest_version
+	if initial or version > config_current_version:
+		config = SafeConfigParser()
+		config.readfp(StringIO(data))
+		config_current_version = version
+
+	# update if greater than latest version ever seen
+	config_latest_version = max(version, config_latest_version)
+
+initial_config_data = ''.join(open(parsed_args.config_file, 'rt').readlines())
+update_config(data=initial_config_data, version=0, initial=True)
 
 # combined getter
 def get(name, section=None):
 	global parsed_args, config
 	try:
-		return getattr(parsed_args, name) # command-line overrides configuration file
+		return getattr(parsed_args, name) # command-line overrides configuration
 	except AttributeError:
-		return ast.literal_eval(config.get(section or 'DEFAULT', name))
+		return literal_eval(config.get(section or 'vmesh', name))
+
+def get_kernel(name):
+	return get(name, 'kernel')
 

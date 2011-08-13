@@ -1,10 +1,9 @@
-[DEFAULT]
+[vmesh]
 debug = True
 log = 'vmesh.log'
-
-connections = 3 ; connections to peers to try and maintain
 sdb_domain = 'vmesh'
 
+connections = 3 ; connections to peers to try and maintain
 peer_entry_lifetime = 120 ; seconds a peer entry should remain in sdb
 
 # Service intervals (seconds)
@@ -13,5 +12,7 @@ kernel_interval = 3
 checkpoint_interval = 120
 clean_up_interval = 30
 
+[kernel]
 kernel_processes = 4
+# energy ratios, movement costs, penalties, etc.
 
