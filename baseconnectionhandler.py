@@ -1,7 +1,6 @@
 import datetime
 import pickle
 from asynchat import async_chat
-from asyncore import poll
 
 class Message:
 	def __init__(self, cmd, payload=None):
@@ -40,6 +39,9 @@ class BaseConnectionHandler(async_chat):
 			# start collecting binary
 			length = int(data.decode('ascii').strip())
 			self.set_terminator(length)
+
+	def dispatch(self, payload):
+		raise NotImplemented
 
 	def handle_write(self):
 		async_chat.handle_write(self)
