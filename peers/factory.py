@@ -6,3 +6,9 @@ class PeerFactory(protocol.Factory):
 	protocol = PeerProtocol
 	def __init__(self, service): self.service = service # stash service
 
+	def startedConnecting(self, connector):
+		pass
+
+	def clientConnectionLost(self, connector, reason):
+		pass
+

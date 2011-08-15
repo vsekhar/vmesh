@@ -14,25 +14,35 @@ class PeerProtocol(amp.AMP):
 		self.svc = self.factory.service
 
 		# request id if incoming
-		d = self.callRemote(commands.GetId
-					).addCallback(self.setRemoteId
-					).setErrback(lambda r: self.transport.loseConnection())
+		self.remote_id = None
+		d = self.callRemote(commands.GetId)
+		d.addCallback(self.setRemoteId)
+		d.addErrback(self.ErrBack)
 		defer.Deferred(d)
 
-	def connectionLost(self):
+	def connectionLost(self, reason):
 		self.svc.unknown_peers.discard(self) # idempotent
 		try:
-			del self.svc.peers[self.remote_id]
+			if self.remote_id:
+				del self.svc.peers[self.remote_id]
 		except KeyError: pass
-		amp.AMP.connectionLost(self)
+		amp.AMP.connectionLost(self, reason)
 
 	def keepMe(self, remote_id):
+		self.remote_id = remote_id
 		self.svc.unknown_peers.discard(self)
 		self.svc.peers[remote_id] = self
+
+	def ErrBack(self, reason):
+		""" Generic errback that just logs error and drops the connection """
+		host, port = self.transport.getHost()
+		# log.warning('Error on connection (%s): %s' % ((host, port), reason.value))
+		self.transport.loseConnection()
 
 	def setRemoteId(self, result):
 		remote_id = result['my_id']
 		if remote_id == self.svc.node_id:
+			# log.debug('self-connection: dropping')
 			self.transport.loseConnection() # drop self-connections
 		elif remote_id in self.svc.peers:
 			"""
