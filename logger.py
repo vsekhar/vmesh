@@ -6,11 +6,12 @@ import os
 
 import args
 
-log = logging.getLogger('vcloud-launch')
-log.setLevel(logging.DEBUG if args.get('debug') else logging.INFO)
-formatter = logging.Formatter(fmt='%(asctime)s %(name)s %(levelname)s: %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
+logging.captureWarnings(True)
+logs = list()
+logs.append(logging.getLogger('vmesh'))
+logs.append(logging.getLogger('vmesh-peers'))
 
-# setup logging to file
+# stream (file) handler
 if args.get('local'):
 	logfilepath = os.path.join(os.getcwd(), args.get('log')) # use current directory
 else:
@@ -18,13 +19,21 @@ else:
 	logfilepath = os.path.join(userinfo.pw_dir, args.get('log')) # user's home dir
 logfile = open(logfilepath, 'a')
 fh = logging.StreamHandler(stream=logfile) # don't use FileHandler since we have to redirect below
+formatter = logging.Formatter(fmt='%(asctime)s %(name)s %(levelname)s: %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 fh.setFormatter(formatter)
-log.addHandler(fh)
 
-# setup logging to console
+# console handler
 sh = logging.StreamHandler()
 sh.setFormatter(formatter)
-log.addHandler(sh)
+
+# add to all loggers
+for log in logs:
+	log.setLevel(logging.DEBUG if args.get('debug') else logging.INFO)
+	log.addHandler(fh)
+	log.addHandler(sh)
+
+# default logger
+log = logging.getLogger('vmesh')
 
 if not args.get('interactive'):
 	# no one is watching, so capture python exception errors and the like

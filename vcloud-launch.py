@@ -2,17 +2,57 @@
 
 version = (1,0,0)
 
-import time
 import string
 import random
+
+from logger import log # do this first to setup logging
 
 import args # processes args
 import peers # starts server socket
 
-from logger import log
+from taskloop import TaskLoop, Task
 
 def random_string(length = 8):
 	return ''.join([random.choice(string.letters + string.digits) for _ in range(length)])
+
+# placeholder kernel processing
+def kernel_processing():
+	try:
+		random_id = random.choice(list(peers.connections.keys()))
+		connection = peers.connections[random_id]
+	except IndexError:
+		pass # no connections
+	else:
+		msg = random_string()
+		connection.send_msg('kernel', msg)	
+
+def peer_processing():
+	peers.top_up()
+	peers.update_node()
+	if args.get('debug'):
+		s = 'connections: '
+		for c in peers.connections.values():
+			s += c.peer_id + ' '
+		s += 'unknowns: %d' % len(peers.unknown_connections)
+		log.debug(s)
+
+def checkpoint():
+	# do checkpoint (stopping the kernel?)
+	# tell kernels to checkpoint themselves?
+	pass
+
+def check_central_config():
+	# if version > args.config_current_version:
+	# get newest version, then args.update_config(data, new_version)
+	pass
+
+def update_pending_config():
+	if args.config_latest_version > args.config_current_version:
+		# fetch from SDB/S3
+		pass
+
+def cleanup():
+	peers.purge_old_peers()
 
 if __name__ == '__main__':
 	if args.get('list'):
@@ -20,80 +60,28 @@ if __name__ == '__main__':
 			print(host.name, host['timestamp'])
 		exit(0)
 
-	# space out remote instances so they don't all hit the DB at the same time
-	if not args.get('local'):
-		import time
-		time.sleep(random.randint(0,5))
-
 	if args.get('reset'):
 		peers.clear_hosts()
 
-	# management intervals
-	config_check_time = time.time()
-	peer_mgmt_time = time.time()
-	kernel_time = time.time()
-	checkpoint_time = time.time()
-	clean_up_time = time.time()
-
 	# initialization
+	if not args.get('local'):
+		import time
+		time.sleep(random.randint(0,5)) # spread out initial database hits
 	peers.update_node()
 	peers.purge_old_peers()
 
 	# main run loop
+	tasks = TaskLoop()
+	tasks += Task(interval = 0, callback = peers.poll)
+	tasks += Task(interval = args.get('kernel_interval'), callback = kernel_processing)
+	tasks += Task(interval = args.get('peer_mgmt_interval'), callback = peer_processing)
+	tasks += Task(interval = args.get('checkpoint_interval'), callback = checkpoint)
+	tasks += Task(interval = args.get('clean_up_interval'), callback = cleanup)
+	tasks += Task(interval=5, interval_max=60, callback = check_central_config)
+	tasks += Task(interval=0, callback = update_pending_config)
+
 	try:
-		while(1):
-			peers.poll()
-
-			cur_time = time.time()
-
-			# randomly check for updated configuration every 5-60 seconds and
-			# broadcast if found
-			if cur_time - config_check_time > random.randint(5,60):
-				pass
-				# if version > args.config_current_version:
-				# get newest version, then args.update_config(data, new_version)
-
-
-			# update configuration if one is pending
-			if args.config_latest_version > args.config_current_version:
-				# fetch from SDB/S3
-				pass
-
-
-			# kernel processing
-			if cur_time - kernel_time > args.get('kernel_interval'):
-				try:
-					random_id = random.choice(list(peers.connections.keys()))
-					connection = peers.connections[random_id]
-				except IndexError:
-					pass
-				else:
-					msg = random_string()
-					connection.send_msg('kernel', msg)
-				finally:
-					kernel_time = cur_time
-
-			# peer processing
-			if cur_time - peer_mgmt_time > args.get('peer_mgmt_interval'):
-				peer_mgmt_time = cur_time
-				peers.top_up()
-				peers.update_node()
-				if args.get('debug'):
-					s = 'connections: '
-					for c in peers.connections.values():
-						s += c.peer_id + ' '
-					s += 'unknowns: %d' % len(peers.unknown_connections)
-					log.debug(s)
-
-			# checkpoint
-			if cur_time - checkpoint_time > args.get('checkpoint_interval'):
-				# do checkpoint (stopping the kernel?)
-				# tell kernels to checkpoint themselves?
-				pass
-
-			# clean-up
-			if cur_time - clean_up_time > args.get('clean_up_interval'):
-				peers.purge_old_peers()
+		tasks.runForever()
 	except KeyboardInterrupt:
-		pass
+		print
 

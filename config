@@ -1,5 +1,5 @@
 [vmesh]
-debug = True
+#debug = True
 log = 'vmesh.log'
 sdb_domain = 'vmesh'
 

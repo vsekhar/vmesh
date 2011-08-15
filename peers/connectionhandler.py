@@ -1,9 +1,11 @@
 import random
+import logging
 
 import args
 from baseconnectionhandler import BaseConnectionHandler
 from node_id import node_id
-from logger import log
+
+log = logging.getLogger('vmesh-peers')
 
 connections = {} # format: {'peer_id': <connection_obj>}
 unknown_connections = set() # format: {<connection_obj>}

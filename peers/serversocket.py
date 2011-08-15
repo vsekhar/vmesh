@@ -1,7 +1,9 @@
 import asyncore
+import logging
 
 import aws
-from logger import log
+
+log = logging.getLogger('vmesh-peers')
 
 class ServerSocket(asyncore.dispatcher):
     def __init__(self, bind_address='', port=0):

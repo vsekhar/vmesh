@@ -1,13 +1,14 @@
 import socket
 import random
+import logging
 
-from logger import log
 from peerhandler import PeerHandler, connections, unknown_connections
 from serversocket import serversocket, poll
 from node_id import node_id
 import args
 import aws
 
+log = logging.getLogger('vmesh-peers')
 sdb_domain = aws.get_sdb_domain()
 
 def new_connection(id):

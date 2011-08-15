@@ -1,6 +1,8 @@
 import args
-from logger import log
+import logging
 from connectionhandler import ConnectionHandler, connections, unknown_connections
+
+log = logging.getLogger('vmesh_peers')
 
 class PeerHandler(ConnectionHandler):
 	def __init__(self, socket, server, id=None):
