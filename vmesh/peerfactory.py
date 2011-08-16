@@ -1,6 +1,6 @@
 from twisted.internet import protocol
 
-from protocol import PeerProtocol
+from peerprotocol import PeerProtocol
 
 class PeerFactory(protocol.Factory):
 	protocol = PeerProtocol

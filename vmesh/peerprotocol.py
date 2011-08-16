@@ -5,21 +5,19 @@ from twisted.internet import defer
 
 import commands
 
-class PeerProtocol(amp.AMP):
+class PeerProtocol(amp.AMP, object):
 
 	def connectionMade(self):
-		amp.AMP.connectionMade(self)
+		ret = super(PeerProtocol, self).connectionMade()
 
 		# 'global' state shortcut
 		self.svc = self.factory.service
-		self.supersvc = self.svc.superservice
 
 		# request id if incoming
 		self.remote_id = None
-		d = self.callRemote(commands.GetId)
-		d.addCallback(self.setRemoteId)
-		d.addErrback(self.ErrBack)
-		defer.Deferred(d)
+		self.getRemoteId()
+
+		return ret
 
 	def connectionLost(self, reason):
 		self.svc.unknown_peers.discard(self) # idempotent
@@ -27,23 +25,39 @@ class PeerProtocol(amp.AMP):
 			if self.remote_id:
 				del self.svc.peers[self.remote_id]
 		except KeyError: pass
-		amp.AMP.connectionLost(self, reason)
+		return super(PeerProtocol, self).connectionLost(reason)
 
 	def keepMe(self, remote_id):
+		print 'Keeping connection to %s' % remote_id
 		self.remote_id = remote_id
 		self.svc.unknown_peers.discard(self)
 		self.svc.peers[remote_id] = self
 
 	def ErrBack(self, reason):
 		""" Generic errback that just logs error and drops the connection """
-		host, port = self.transport.getHost()
-		# log.warning('Error on connection (%s): %s' % ((host, port), reason.value))
+		hostinfo = self.transport.getHost()
+		host = hostinfo.host
+		port = hostinfo.port
+		print 'Error on connection (%s:%s): %s' % (host, port, reason.value)
 		self.transport.loseConnection()
+
+	def getRemoteId(self):
+		d = self.callRemote(commands.GetId)
+		d.addCallback(self.setRemoteId)
+		d.addErrback(self.ErrBack)
+		defer.Deferred(d)
+
+	def sendKernelMsg(self, msg):
+		d = self.callRemote(commands.KernelMsg, kernel_msg=msg)
+		d.addCallback(lambda r: self.getRemoteId() if not r['ok'] else None)
+		d.addErrback(self.ErrBack)
+		defer.Deferred(d)
 
 	def setRemoteId(self, result):
 		remote_id = result['my_id']
+		print 'Got ID: %s' % remote_id
 		if remote_id == self.svc.node_id:
-			# log.debug('self-connection: dropping')
+			print 'self-connection to %s: dropping' % remote_id
 			self.transport.loseConnection() # drop self-connections
 		elif remote_id in self.svc.peers:
 			"""
@@ -53,16 +67,17 @@ class PeerProtocol(amp.AMP):
 			time they'll drop different connections (resulting in both being
 			dropped and requiring a re-attempt).
 			"""
+			print 'Duplicate connection %s' % remote_id			
 			if random.choice((True, False)):
 				self.transport.loseConnection() # drop this one
-				# log.debug('duplicate connection: dropping new connection')
+				print 'duplicate connection: dropping new connection'
 			else:
 				connections[self.peer_id].transport.loseConnection() # drop other one
 				self.keep_me(remote_id)
-				# log.debug('duplicate connection: dropping previous connection')
+				print 'duplicate connection: dropping previous connection'
 		else:
 			# no self-connection or dupes, so stash
-			self.keep_me(remote_id)
+			self.keepMe(remote_id)
 
 	@commands.Hello.responder
 	def hello(self):
@@ -78,13 +93,18 @@ class PeerProtocol(amp.AMP):
 
 	@commands.GetConfigVersion.responder
 	def getconfigversion(self):
-		return {'my_config_version': self.supersvc.config_version}
+		return {'my_config_version': self.svc.config_version}
 
 	@commands.NewConfigVersion.responder
 	def newconfigversion(self, new_version):
-		self.svc.new_config_version = max(newversion, self.supersvc.new_config_version)
+		self.svc.new_config_version = max(newversion, self.svc.new_config_version)
+		return {}
 
 	@commands.KernelMsg.responder
 	def kernelmsg(self, kernel_msg):
-		print self.svc.kernel_msg(kernel_msg)
+		if self.remote_id:
+			self.svc.incoming_queue.put(kernel_msg)
+			return {'ok': True}
+		else:
+			return {'ok': False}
 

@@ -24,6 +24,7 @@ class NewConfigVersion(amp.Command):
 class KernelMsg(amp.Command):
 	""" Send a kernel message """
 	arguments = [('kernel_msg', amp.Unicode())]
+	response = [('ok', amp.Boolean())]
 
 class FlowControl(amp.Command):
 	""" Set flow control for sender """
