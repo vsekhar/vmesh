@@ -12,6 +12,7 @@ class PeerProtocol(amp.AMP):
 
 		# 'global' state shortcut
 		self.svc = self.factory.service
+		self.supersvc = self.svc.superservice
 
 		# request id if incoming
 		self.remote_id = None
@@ -77,11 +78,11 @@ class PeerProtocol(amp.AMP):
 
 	@commands.GetConfigVersion.responder
 	def getconfigversion(self):
-		return {'my_config_version': self.svc.config_version}
+		return {'my_config_version': self.supersvc.config_version}
 
 	@commands.NewConfigVersion.responder
 	def newconfigversion(self, new_version):
-		self.svc.new_config_version = max(newversion, self.svc.new_config_version)
+		self.svc.new_config_version = max(newversion, self.supersvc.new_config_version)
 
 	@commands.KernelMsg.responder
 	def kernelmsg(self, kernel_msg):
