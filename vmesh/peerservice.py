@@ -94,6 +94,9 @@ class PeerService(IntervalService, object):
 		record = dom.get_item(self.node_id)
 		if record is None:
 			record = dom.new_item(self.node_id)
+		# Have to pad the timestamp to allow for SDB's lexicographic sorting
+		# Padding to 12-digits is used, which should give us another 3,000 years...
+		# (http://en.wikipedia.org/wiki/Unix_time)
 		record['timestamp'] = '%012d' % time.time()
 		record.save()
 
