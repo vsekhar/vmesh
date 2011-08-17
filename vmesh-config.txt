@@ -1,0 +1,5 @@
+#vmesh-config
+
+[DEFAULT]
+hello=['abc', '123']
+

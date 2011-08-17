@@ -1,0 +1,18 @@
+#upstart-job
+
+description "Vmesh upstart job"
+author "Vivek Sekhar <vivek@viveksekhar.ca>"
+
+start on stopped cloud-final
+stop on shutdown
+
+# uncomment to cause instigating events to wait for this 'task' to complete
+# otherwise, instigating events spawn this 'service' and continue while it starts
+# task
+
+# the environment here has minimal path, and no pythonpath 
+exec /usr/bin/twistd -u ubuntu -g ubuntu --syslog vmesh
+
+#script
+#end script
+

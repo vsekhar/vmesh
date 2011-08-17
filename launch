@@ -1,0 +1,5 @@
+#!/bin/bash
+
+write-mime-multipart cloud-config vmesh-job parthandler.py vmesh-config.txt:text/vmesh-config | gzip > user-data-file.gz
+euca-run-instances ami-e2af508b --user-data-file=user-data-file.gz --key=cdk11744-nix
+
