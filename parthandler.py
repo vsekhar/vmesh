@@ -1,5 +1,7 @@
 #part-handler
 
+import os
+import sys
 import ConfigParser
 import cStringIO
 import boto
@@ -10,7 +12,7 @@ def list_types():
 	# return a list of mime-types that are handled by this module
 	return(["text/vmesh-config"])
 
-def handle_part(data,ctype,filename,payload,frequency=None):
+def handle_part(data,ctype,filename,payload,frequency=None, local=False):
 	# data: the cloudinit object
 	# ctype: '__begin__', '__end__', or the specific mime-type of the part
 	# filename: the filename for the part, or dynamically generated part if
@@ -31,10 +33,39 @@ def handle_part(data,ctype,filename,payload,frequency=None):
 	sio = cStringIO.StringIO(payload)
 	config = ConfigParser.SafeConfigParser()
 	config.readfp(sio, filename)
+	sio.close()
 
-	for line in payload.splitlines():
-		# get code and install it to /usr/local/lib/python2.7/dist-packages (this is on the default pythonpath)
-		print line
+	# get code egg and install it using easy_install
+	s3 = boto.connect_s3(config.get('DEFAULT', 'node_access_key'), config.get('DEFAULT', 'node_secret_key'))
+	bucket_name = config.get('DEFAULT', 'bucket')
+	egg_file_name = config.get('DEFAULT', 'egg_file_name')
+	package_name = config.get('DEFAULT', 'package_name')
+
+	bucket = s3.get_bucket(bucket_name)
+	if not bucket:
+		print 'Bucket does not exist: %s' % bucket_name
+		sys.exit(1)
+	key = bucket.get_key(egg_file_name)
+	if not key:
+		print 'Bucket \'%s\' does not have key \'%s\'' % (bucket_name, egg_file_name)
+
+	# save the egg and config
+	path = './varlibvmesh' if local else '/var/lib/vmesh'
+	try: os.mkdir(path)
+	except OSError: pass
+	eggfile = open(os.path.join(path, egg_file_name), 'wb')
+	key.get_contents_to_file(eggfile)
+	eggfile.close()
+	print 'Wrote s3:%s/%s to %s' % (bucket_name, egg_file_name, eggfile.name)
+	with open(os.path.join(path, 'config'), 'wt') as script:
+		script.write(payload)
+		print 'Wrote vmesh-config to %s' % script.name
+		import stat
+		os.fchmod(script.fileno(), stat.S_IREAD | stat.S_IWRITE)
 
 	print "==== end ctype=%s filename=%s" % (ctype, filename)
+
+if __name__ == '__main__':
+	import sys
+	handle_part(None, None, None, open(sys.argv[1]).read(), None, local=True)
 

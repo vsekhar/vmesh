@@ -1,0 +1,5 @@
+#!/bin/bash
+
+instance_list=`euca-describe-instances | grep ^INSTANCE | grep running | cut -f2 | tr '\n' ' '`
+euca-terminate-instances $instance_list
+

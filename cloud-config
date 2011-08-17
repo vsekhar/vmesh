@@ -3,7 +3,8 @@
 #apt_update: true
 #apt_upgrade: true
 
-#packages:
+packages:
+ - python-setuptools
 # - htop
 # - screen
 # - python-boto
@@ -12,7 +13,7 @@
 
 # ssh_import_id: [vivek-7]
 ssh_authorized_keys:
- - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC/pYVyo/C2Cpcts9pSdFjSROTqpjaGT9vWxjFtIASNpsa2RV7HZVdGMgnwtaN8NsD5s5WR2JUtcHsCdpvYaKLIVvF0FooTcK4CZAgHfYbkhqTGmhqHMBHIgZaJrsPgLOmZ9ctAeWXVQl20YkxgExu+1cQeps4niAQojVnMCusu/CMXzY9KpE/9GfW99R2EenDqmmAJvSMcKk9wa3Li9kc/F5rhQ4z8Vau/dgZumrfOjYsMhtiDeVbULeFwthPmbIHY8iek+MTE/VUOd0TR9n3Tslkqh94KBXNoWEgBhfnvCgSmbRyqlnZ7+2EYQyO74KtdVqGCmAr8vGp3GcZIDyGt vsekhar@cdk11744-nix2
+ - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC/pYVyo/C2Cpcts9pSdFjSROTqpjaGT9vWxjFtIASNpsa2RV7HZVdGMgnwtaN8NsD5s5WR2JUtcHsCdpvYaKLIVvF0FooTcK4CZAgHfYbkhqTGmhqHMBHIgZaJrsPgLOmZ9ctAeWXVQl20YkxgExu+1cQeps4niAQojVnMCusu/CMXzY9KpE/9GfW99R2EenDqmmAJvSMcKk9wa3Li9kc/F5rhQ4z8Vau/dgZumrfOjYsMhtiDeVbULeFwthPmbIHY8iek+MTE/VUOd0TR9n3Tslkqh94KBXNoWEgBhfnvCgSmbRyqlnZ7+2EYQyO74KtdVqGCmAr8vGp3GcZIDyGt vsekhar@cdk11744-nix-via-cloud-config
 
 # byobu_by_default: system for all users
 # byobu_by_default: user

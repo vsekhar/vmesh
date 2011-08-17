@@ -19,11 +19,8 @@ class Options(BaseOptions):
 					, ['reset', 'r', None, 'Reset metadata and exit']
 					]
 
-	optParameters = [['access-key', None, None, 'AWS access key to use']
-					,['secret-key', None, None, 'AWS secret key to use']
-					,['config', 'c', None, 'Config file to use (default=./config)']
-					,['log', None, None, 'Logfile to use (default=twisted-defined)']
-					,['port', 'p', 0, 'The port number to listen on (default = random)']
+	optParameters = [['config-file', 'c', None, 'Configuration file to load']
+					, ['port', 'p', 0, 'The port number to listen on (default = random)']
 					]
 
 from ConfigParser import Error
@@ -34,9 +31,6 @@ def parse_config(data):
 	return new_config
 
 def load_config(options):
-	if options.has_key('config') and options['config'] is not None:
-		filename = options['config']
-	else:
-		filename = 'config'
-	return parse_config(''.join(open(filename, 'rt').readlines()))
+	with open(options['config-file'], mode='rt') as configfile:
+		return parse_config(configfile.read())
 

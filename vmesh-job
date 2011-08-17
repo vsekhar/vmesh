@@ -6,13 +6,17 @@ author "Vivek Sekhar <vivek@viveksekhar.ca>"
 start on stopped cloud-final
 stop on shutdown
 
-# uncomment to cause instigating events to wait for this 'task' to complete
-# otherwise, instigating events spawn this 'service' and continue while it starts
-# task
+#exec /usr/bin/twistd -n -u ubuntu -g ubuntu --syslog vmesh
 
-# the environment here has minimal path, and no pythonpath 
-exec /usr/bin/twistd -u ubuntu -g ubuntu --syslog vmesh
+script
+easy_install /var/lib/vmesh/vmesh.egg
 
-#script
-#end script
+python <<EOF
+from twisted.plugin import IPlugin, getPlugins
+list(getPlugins(IPlugin))
+EOF
+
+/usr/bin/twistd -n -u ubuntu -g ubuntu --syslog --pidfile=/dev/null vmesh --config-file=/var/lib/vmesh/config
+
+end script
 

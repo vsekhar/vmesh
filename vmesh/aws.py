@@ -2,7 +2,7 @@ import boto
 import boto.utils
 
 class AWS:
-	def __init__(self, opt):
+	def __init__(self, opt, conf):
 		self.local = opt['local']
 		if self.local:
 			self.metadata = {'public-hostname': 'localhost',
@@ -10,10 +10,10 @@ class AWS:
 						'ami-id': 'ami-localdebug'}
 			self.sdb = boto.connect_sdb()
 			self.s3 = boto.connect_s3()
-		elif opt.has_key('access_key') and opt.has_key('secret_key'):
+		elif conf.has_option('vmesh', 'node_access_key') and conf.has_option('vmesh', 'node_secret_key'):
 			self.metadata = boto.utils.get_instance_metadata()
-			self.sdb = boto.connect_sdb(access_key, secret_key)
-			self.s3 = boto.connect_s3(access_key, secret_key)
+			self.sdb = boto.connect_sdb(conf.get('vmesh', 'node_access_key'), conf.get('vmesh', 'node_secret_key'))
+			self.s3 = boto.connect_s3(conf.get('vmesh', 'node_access_key'), conf.get('vmesh', 'node_secret_key'))
 		else:
 			raise RuntimeError('Need access_key and secret_key for non-local execution')
 

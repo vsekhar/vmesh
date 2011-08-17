@@ -11,11 +11,14 @@
 
 *.log
 
-# editor files
+# temp files
 *~
+temp/
 
-# 'compiled' files
-user-data-file.gz
+# 'compiled' files and directories
+*.egg-info
+dist/
+build/
 
 # scons cruft
 .sconsign

@@ -14,7 +14,7 @@ class NodeService(service.MultiService, object):
 		self.config_version = 0
 		self.new_config_version = 0
 		self.config = options.load_config(self.options)
-		self.aws = aws.AWS(self.options)
+		self.aws = aws.AWS(self.options, self.config)
 
 		# services
 		self.kernelservice = KernelService(self)
