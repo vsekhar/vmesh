@@ -7,7 +7,7 @@
 [vmesh]
 #debug = True
 log = vmesh.log
-tracker_domain = vmesh
+sdb_domain = vmesh
 
 ### ^^^ above values should not change during a run ^^^ ###
 
@@ -19,7 +19,7 @@ peer_entry_lifetime = 120 ; seconds a peer entry should remain in sdb
 top_up_interval = 15
 purge_old_peers_interval = 30
 update_interval = 15
-status_interval = -1
+status_interval = 3
 send_interval = 3
 
 # kernel
