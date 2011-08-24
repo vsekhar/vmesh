@@ -1,15 +1,16 @@
 #cloud-config
 
-#apt_update: true
-#apt_upgrade: true
+apt_update: true
+apt_upgrade: true
 
 packages:
+ - rsyslog
+ - htop
  - python-setuptools
-# - htop
-# - screen
-# - python-boto
-# - python-twisted
-# - python-zope.interface
+ - python-boto
+ - python-twisted
+ - python-zope.interface
+
 
 # ssh_import_id: [vivek-7]
 ssh_authorized_keys:
@@ -30,5 +31,5 @@ output:
 
 timezone: US/Eastern
 
-final_message: "System is up at $TIMESTAMP (after $UPTIME seconds)"
+final_message: "cloud-config final_message: System is up at $TIMESTAMP (after $UPTIME seconds)"
 
