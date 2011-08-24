@@ -20,7 +20,6 @@ class NodeService(service.MultiService, object):
 		self.kernelservice = KernelService(self)
 		self.addService(self.kernelservice)
 
-		# interconnect
 		self.incoming_queue = self.kernelservice.incoming_queue
 		self.outgoing_queue = self.kernelservice.outgoing_queue
 
