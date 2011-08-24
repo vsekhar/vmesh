@@ -59,6 +59,6 @@ def get(name, section=None):
 	try:
 		return getattr(_args, name) # command-line overrides configuration file
 	except AttributeError:
-		global config, config_name
+		global config
 		return parse(config.get(section or _args.configuration, name))
 
