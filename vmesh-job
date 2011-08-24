@@ -6,17 +6,20 @@ author "Vivek Sekhar <vivek@viveksekhar.ca>"
 start on stopped cloud-final
 stop on shutdown
 
-#exec /usr/bin/twistd -n -u ubuntu -g ubuntu --syslog vmesh
-
 script
+
+# install some stuff
+easy_install ampoule
 easy_install /var/lib/vmesh/vmesh.egg
 
+# update the twisted plugin index
 python <<EOF
 from twisted.plugin import IPlugin, getPlugins
 list(getPlugins(IPlugin))
 EOF
 
-/usr/bin/twistd -n -u ubuntu -g ubuntu --syslog --pidfile=/dev/null vmesh --config-file=/var/lib/vmesh/config
+# start daemon (do not fork, since upstart will track this script's PID)
+/usr/bin/twistd -n -u ubuntu -g ubuntu --syslog vmesh --config-file=/var/lib/vmesh/config
 
 end script
 
