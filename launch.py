@@ -39,7 +39,26 @@ def launch_remote(user_data):
 								)
 		return reservation
 
+def launch_bare():
+	return launch.ec2.run_instances(
+				image_id=launch.get_arg('ami'),
+				min_count=launch.get_arg('count'),
+				max_count=launch.get_arg('count'),
+				key_name=launch.get_arg('key_pair'),
+				security_groups=launch.get_arg('security_groups'),
+				instance_type=launch.get_arg('instance_type')
+				)
+
+
 if __name__ == '__main__':
+	try:
+		bare = launch.get_arg('bare')
+	except launch.args.NoOptionError:
+		bare = False
+	if bare:
+		print launch_bare()
+		sys.exit(0)
+
 	bucketname = launch.get_arg('bucket')
 	# packagename = launch.get_arg('package_name')
 	eggfilename = launch.get_arg('egg_file_name')
@@ -76,7 +95,7 @@ if __name__ == '__main__':
 
 	if launch.get_arg('upload_only'):
 		sys.exit(0)
-	
+
 	# create multipart userdata
 	with tempfile.NamedTemporaryFile() as configfile:
 		configfile.write(config)

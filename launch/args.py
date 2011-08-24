@@ -20,7 +20,7 @@ _args = parser.parse_args()
 # configuration file
 if not _args.config_file:
 	homedir = os.getenv('USERPROFILE') or os.getenv('HOME')
-	_args.config_file = os.path.join(homedir, '.vcloud')
+	_args.config_file = os.path.join(homedir, '.vmesh')
 
 config = ConfigParser.SafeConfigParser()
 config.read(_args.config_file)
