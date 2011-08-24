@@ -3,7 +3,7 @@ import random
 from twisted.protocols import amp
 from twisted.internet import defer
 
-import commands
+import peercommands
 
 class PeerProtocol(amp.AMP, object):
 
@@ -42,13 +42,13 @@ class PeerProtocol(amp.AMP, object):
 		self.transport.loseConnection()
 
 	def getRemoteId(self):
-		d = self.callRemote(commands.GetId)
+		d = self.callRemote(peercommands.GetId)
 		d.addCallback(self.setRemoteId)
 		d.addErrback(self.ErrBack)
 		defer.Deferred(d)
 
 	def sendKernelMsg(self, msg):
-		d = self.callRemote(commands.KernelMsg, kernel_msg=msg)
+		d = self.callRemote(peercommands.KernelMsg, kernel_msg=msg)
 		d.addCallback(lambda r: self.getRemoteId() if not r['ok'] else None)
 		d.addErrback(self.ErrBack)
 		defer.Deferred(d)
@@ -79,28 +79,28 @@ class PeerProtocol(amp.AMP, object):
 			# no self-connection or dupes, so stash
 			self.keepMe(remote_id)
 
-	@commands.Hello.responder
+	@peercommands.Hello.responder
 	def hello(self):
 		return {'hello_response': 'well hello there'}
 
-	@commands.Echo.responder
+	@peercommands.Echo.responder
 	def echo(self, echo_msg):
 		return {'echo_response': msg}
 
-	@commands.GetId.responder
+	@peercommands.GetId.responder
 	def getid(self):
 		return {'my_id': self.svc.node_id}
 
-	@commands.GetConfigVersion.responder
+	@peercommands.GetConfigVersion.responder
 	def getconfigversion(self):
 		return {'my_config_version': self.svc.config_version}
 
-	@commands.NewConfigVersion.responder
+	@peercommands.NewConfigVersion.responder
 	def newconfigversion(self, new_version):
 		self.svc.new_config_version = max(newversion, self.svc.new_config_version)
 		return {}
 
-	@commands.KernelMsg.responder
+	@peercommands.KernelMsg.responder
 	def kernelmsg(self, kernel_msg):
 		if self.remote_id:
 			self.svc.incoming_queue.put(kernel_msg)

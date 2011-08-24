@@ -53,11 +53,10 @@ class PeerService(IntervalService, object):
 		reactor.connectTCP(host, port, self.factory)
 
 	def hosts(self, sort=None):
-		query_string = 'SELECT timestamp FROM %s WHERE timestamp is not null ORDER BY timestamp' % self.config.get('vmesh', 'tracker_domain')
+		query_string = 'SELECT timestamp FROM %s WHERE timestamp is not null ORDER BY timestamp' % self.config.get('vmesh', 'sdb_domain')
 		if sort is not None:
 			query_string += ' ' + sort
-		dom = self.aws.getDomain(self.config.get('vmesh', 'tracker_domain'))
-		q = dom.select(query_string)
+		q = self.aws.query(query_string)
 		for host in q:
 			yield host
 
@@ -90,13 +89,11 @@ class PeerService(IntervalService, object):
 				if deficit <= 0: break
 
 	def update(self):
-		dom = self.aws.getDomain(self.config.get('vmesh', 'tracker_domain'), create=True)
-		record = dom.get_item(self.node_id)
-		if record is None:
-			record = dom.new_item(self.node_id)
 		# Have to pad the timestamp to allow for SDB's lexicographic sorting
 		# Padding to 12-digits is used, which should give us another 3,000 years...
 		# (http://en.wikipedia.org/wiki/Unix_time)
+
+		record = self.aws.getItem(name=self.node_id, create=True)
 		record['timestamp'] = '%012d' % time.time()
 		record.save()
 
