@@ -34,6 +34,8 @@ def process_inheritance(section):
 	# does it inherit anything?
 	if config.has_option(section, 'inherit'):
 		src = parse(config.get(section, 'inherit'))
+		if src == section:
+			print 'Warning: recursive inheritance of section \'%s\'' % section
 
 		# recurse if needed
 		if src not in inherit_processed:
