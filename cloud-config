@@ -11,6 +11,9 @@ packages:
  - python-twisted
  - python-zope.interface
 
+rsyslog:
+ - filename: 45-splunk.conf
+   content : '*.*   @@logs3.splunkstorm.com:20055'
 
 # ssh_import_id: [vivek-7]
 ssh_authorized_keys:
