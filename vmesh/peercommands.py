@@ -2,11 +2,11 @@ from twisted.protocols import amp
 
 class Hello(amp.Command):
 	""" Basic ping """
-	reponse = [('hello_response', amp.String())]
+	response = [('hello_response', amp.String())]
 
 class Echo(amp.Command):
 	""" Basic echo of a string """
-	argument = [('echo_msg', amp.String())]
+	arguments = [('echo_msg', amp.String())]
 	response = [('echo_response', amp.String())]
 
 class GetId(amp.Command):
