@@ -8,6 +8,7 @@ import ConfigParser
 # command line
 parser = argparse.ArgumentParser(description='cloudlaunch.py: launch scripts in the cloud')
 parser.add_argument('-l', '--local', default=False, action='store_true', help='run locally')
+parser.add_argument('-b', '--bare', default=argparse.SUPPRESS, action='store_true', help='launch bare instances only (no initial config)')
 parser.add_argument('--config-only', default=False, action='store_true', help='merge and output config file, then exit')
 parser.add_argument('-u', '--upload-only', default=False, action='store_true', help='upload the package, then exit')
 parser.add_argument('-f', '--config-file', default=None, help='config file to use (default=\'~/.vcloud\')')
