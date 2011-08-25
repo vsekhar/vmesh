@@ -11,7 +11,10 @@ packages:
  - python-twisted
  - python-zope.interface
 
+# Configure rsyslog to: log to a file, turn off message reduction, and log to
+# a remote splunk server
 rsyslog:
+ - '$RepeatedMsgReduction off'
  - filename: 45-splunk.conf
    content : '*.*   @@logs3.splunkstorm.com:20055'
 
@@ -30,7 +33,9 @@ ssh_authorized_keys:
 # resize_rootfs: true
 
 output:
- all: ">> /var/log/cloud-init.log"
+ all:
+   output: "| tee /var/log/cloud-init.log | logger -t CLOUDINIT"
+   error: "&1"
 
 timezone: US/Eastern
 
