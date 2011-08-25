@@ -1,4 +1,5 @@
 from twisted.application import service
+from twisted.python import log
 
 import aws
 import options
@@ -29,7 +30,7 @@ class NodeService(service.MultiService, object):
 	def startService(self):
 		self.listen_port = self.peerservice.listen_port # port was opened in privilegedStartService()
 		self.node_id = self.aws.metadata['public-hostname'] + ':' + str(self.listen_port)
-		print 'Node ID: %s' % self.node_id
+		log.msg('Node ID: %s' % self.node_id)
 		return super(NodeService, self).startService() # starts all added services
 
 # Entry point via the tap

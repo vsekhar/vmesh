@@ -2,6 +2,7 @@ import random
 
 from twisted.protocols import amp
 from twisted.internet import defer
+from twisted.python import log
 
 import peercommands
 
@@ -28,7 +29,7 @@ class PeerProtocol(amp.AMP, object):
 		return super(PeerProtocol, self).connectionLost(reason)
 
 	def keepMe(self, remote_id):
-		print 'Keeping connection to %s' % remote_id
+		log.msg('Keeping connection to %s' % remote_id)
 		self.remote_id = remote_id
 		self.svc.unknown_peers.discard(self)
 		self.svc.peers[remote_id] = self
@@ -38,7 +39,7 @@ class PeerProtocol(amp.AMP, object):
 		hostinfo = self.transport.getHost()
 		host = hostinfo.host
 		port = hostinfo.port
-		print 'Error on connection (%s:%s): %s' % (host, port, reason.value)
+		log.msg('Error on connection (%s:%s): %s' % (host, port, reason.value))
 		self.transport.loseConnection()
 
 	def getRemoteId(self):
@@ -55,9 +56,9 @@ class PeerProtocol(amp.AMP, object):
 
 	def setRemoteId(self, result):
 		remote_id = result['my_id']
-		print 'Got ID: %s' % remote_id
+		log.msg('Got ID: %s' % remote_id)
 		if remote_id == self.svc.node_id:
-			print 'self-connection to %s: dropping' % remote_id
+			log.msg('self-connection to %s: dropping' % remote_id)
 			self.transport.loseConnection() # drop self-connections
 		elif remote_id in self.svc.peers:
 			"""
@@ -67,14 +68,14 @@ class PeerProtocol(amp.AMP, object):
 			time they'll drop different connections (resulting in both being
 			dropped and requiring a re-attempt).
 			"""
-			print 'Duplicate connection %s' % remote_id			
+			log.msg('Duplicate connection %s' % remote_id)
 			if random.choice((True, False)):
 				self.transport.loseConnection() # drop this one
-				print 'duplicate connection: dropping new connection'
+				log.msg('duplicate connection: dropping new connection')
 			else:
 				connections[self.peer_id].transport.loseConnection() # drop other one
 				self.keep_me(remote_id)
-				print 'duplicate connection: dropping previous connection'
+				log.msg('duplicate connection: dropping previous connection')
 		else:
 			# no self-connection or dupes, so stash
 			self.keepMe(remote_id)

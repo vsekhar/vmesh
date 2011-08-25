@@ -3,6 +3,7 @@ import random
 from Queue import Empty
 
 from twisted.internet import reactor, defer
+from twisted.python import log
 
 from peerfactory import PeerFactory
 from intervalservice import IntervalService
@@ -65,7 +66,7 @@ class PeerService(IntervalService, object):
 			host.delete()
 
 	def kernel_msg(self, msg):
-		print 'Kernel msg: %s' % msg
+		log.msg('Kernel msg: %s' % msg)
 
 	###########################################################################
 	# Interval calls
@@ -98,7 +99,7 @@ class PeerService(IntervalService, object):
 		record.save()
 
 	def status(self):
-		print 'Peers: %d; unknowns: %d' % (len(self.peers), len(self.unknown_peers))
+		log.msg('Peers: %d; unknowns: %d' % (len(self.peers), len(self.unknown_peers)))
 
 	def send(self):
 		if not len(self.peers):

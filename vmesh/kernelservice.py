@@ -4,6 +4,7 @@ import random
 import string
 
 from twisted.application.internet import TimerService
+from twisted.python import log
 from twisted.internet import defer
 
 from intervalservice import IntervalService
@@ -23,7 +24,7 @@ def random_mgmt(inqueue, outqueue):
 	# shuttle messages to/from kernels
 	try:
 		while True:
-			print 'Kernel msg: %s' % inqueue.get_nowait()
+			log.msg('Kernel msg: %s' % inqueue.get_nowait())
 	except Empty: pass
 	outqueue.put(random_string())
 
