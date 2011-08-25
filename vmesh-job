@@ -21,5 +21,7 @@ EOF
 # start daemon (do not fork, since upstart will track this script's PID)
 /usr/bin/twistd -n -u ubuntu -g ubuntu --syslog --prefix vmesh vmesh --config-file=/var/lib/vmesh/config
 
+# for local: twistd -n --prefix vmesh vmesh -ldc config
+
 end script
 
