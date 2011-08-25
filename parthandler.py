@@ -1,9 +1,12 @@
 #part-handler
 
 import os
+import stat
 import sys
 import ConfigParser
 import cStringIO
+from contextlib import closing
+
 import boto
 
 handler_version = 2
@@ -53,15 +56,13 @@ def handle_part(data,ctype,filename,payload,frequency=None, local=False):
 	path = './varlibvmesh' if local else '/var/lib/vmesh'
 	try: os.mkdir(path)
 	except OSError: pass
-	eggfile = open(os.path.join(path, egg_file_name), 'wb')
-	key.get_contents_to_file(eggfile)
-	eggfile.close()
+	with closing(open(os.path.join(path, egg_file_name), 'wb')) as eggfile:
+		key.get_contents_to_file(eggfile)
 	print 'Wrote s3:%s/%s to %s' % (bucket_name, egg_file_name, eggfile.name)
-	with open(os.path.join(path, 'config'), 'wt') as script:
+	with closing(open(os.path.join(path, 'config'), 'wt')) as script:
 		script.write(payload)
-		print 'Wrote vmesh-config to %s' % script.name
-		import stat
 		os.fchmod(script.fileno(), stat.S_IREAD | stat.S_IWRITE)
+	print 'Wrote vmesh-config to %s' % script.name
 
 	print "==== end ctype=%s filename=%s" % (ctype, filename)
 
