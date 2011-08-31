@@ -62,7 +62,7 @@ def handle_part(data,ctype,filename,payload,frequency=None, local=False):
 	with closing(open(os.path.join(path, 'config'), 'wt')) as configfile:
 		os.fchmod(configfile.fileno(), stat.S_IREAD | stat.S_IWRITE)
 		configfile.write(payload)
-	print 'Wrote vmesh-config to %s' % script.name
+	print 'Wrote vmesh-config to %s' % configfile.name
 
 	print "==== end ctype=%s filename=%s" % (ctype, filename)
 
