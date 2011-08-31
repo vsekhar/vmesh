@@ -59,9 +59,9 @@ def handle_part(data,ctype,filename,payload,frequency=None, local=False):
 	with closing(open(os.path.join(path, egg_file_name), 'wb')) as eggfile:
 		key.get_contents_to_file(eggfile)
 	print 'Wrote s3:%s/%s to %s' % (bucket_name, egg_file_name, eggfile.name)
-	with closing(open(os.path.join(path, 'config'), 'wt')) as script:
-		script.write(payload)
-		os.fchmod(script.fileno(), stat.S_IREAD | stat.S_IWRITE)
+	with closing(open(os.path.join(path, 'config'), 'wt')) as configfile:
+		os.fchmod(configfile.fileno(), stat.S_IREAD | stat.S_IWRITE)
+		configfile.write(payload)
 	print 'Wrote vmesh-config to %s' % script.name
 
 	print "==== end ctype=%s filename=%s" % (ctype, filename)
