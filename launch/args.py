@@ -12,7 +12,7 @@ parser.add_argument('-l', '--local', default=False, action='store_true', help='r
 parser.add_argument('-b', '--bare', default=argparse.SUPPRESS, action='store_true', help='launch bare instances only (no initial config)')
 parser.add_argument('--config-only', default=False, action='store_true', help='merge and output config file, then exit')
 parser.add_argument('-u', '--upload-only', default=False, action='store_true', help='upload the package, then exit')
-parser.add_argument('-f', '--config-file', default=None, help='config file to use (default=\'~/.vcloud\')')
+parser.add_argument('-f', '--config-file', default=None, help='config file to use (default=\'~/.vmesh\')')
 parser.add_argument('-c', '--configuration', default='DEFAULT', help='configuration name in config file (default=\'DEFAULT\')')
 parser.add_argument('--list-configurations', default=False, action='store_true', help='list configurations, then exit')
 parser.add_argument('-n', '--count', default=argparse.SUPPRESS, help='number of nodes to start')
