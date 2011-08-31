@@ -21,8 +21,9 @@ rsyslog:
 # ssh_import_id: [vivek-7]
 ssh_authorized_keys:
  - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC/pYVyo/C2Cpcts9pSdFjSROTqpjaGT9vWxjFtIASNpsa2RV7HZVdGMgnwtaN8NsD5s5WR2JUtcHsCdpvYaKLIVvF0FooTcK4CZAgHfYbkhqTGmhqHMBHIgZaJrsPgLOmZ9ctAeWXVQl20YkxgExu+1cQeps4niAQojVnMCusu/CMXzY9KpE/9GfW99R2EenDqmmAJvSMcKk9wa3Li9kc/F5rhQ4z8Vau/dgZumrfOjYsMhtiDeVbULeFwthPmbIHY8iek+MTE/VUOd0TR9n3Tslkqh94KBXNoWEgBhfnvCgSmbRyqlnZ7+2EYQyO74KtdVqGCmAr8vGp3GcZIDyGt vsekhar@cdk11744-nix-via-cloud-config
+ - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDQ2DHHh/itZlb07xGsTARbKlwYyM+kBFwb/XZK0fUXa46rQKbzH7jj8aExt8BhTBD0G5potFm5BsJm0vZBVUX7AYzDaJpplhrN9yE3oRnw7kS8kWrxzdcmPV9DDF6gIIkjXgJfA6YmIyJdfbndxeeFQwog9krprcA0utUC/aGxwxKIVbjGzEhHFLNNvPfGQEukNxnRaPc/2DJDGLn6EYukQP5YC75SvjQuyCVnXCmcYqlR3KXnsSQhXz2pLeoAO1R+TXG0nCV7kX5oNIOK8IUfySG2LGUwxOIpGdz9QoIzNSXg4zdJOuy5M/D0Xgil/FjR5unN++YexDxRdKIKmtmR vsekhar@cdk11746-nix-via-cloud-config
 
-# byobu_by_default: system for all users
+# byobu_by_default: system ; for all users
 # byobu_by_default: user
 
 # runcmd:
