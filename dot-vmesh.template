@@ -1,0 +1,53 @@
+#
+# vmesh configuration file (copy to ~/.vmesh and fill out credentials)
+#
+
+[local]
+# credentials for local use (if commented out, local boto default credentials are used)
+#local_access_key = 'ABCD1234'
+#local_secret_key = '9876eA4'
+
+### --- Configuration: DEFAULT (inherited into all configurations) --- ###
+[DEFAULT]
+# credentials for launched AMI's to use (may be different than what we're using locally)
+node_access_key = 'ABCD'
+node_secret_key = 'ABC123'
+
+### --- Configuration: base (basic settings (1 small on-demand instance)) --- ###
+[base]
+ami = 'ami-e2af508b' ; Ubuntu 11.04 Natty Server 32-bit us-east-1
+instance_type = 'm1.small'
+security_groups = ['default'] ; port 22
+count = 1 ; can be overridden at command line
+spot_instances = False
+key_pair = '' ; usually provided in cloud-config file
+
+### --- Configuration: debug (provide a key in case cloud-init fails) --- ###
+[debug]
+inherit = 'base'
+key_pair = 'cdk11744-nix'
+
+### --- Configuration: vmesh --- ###
+[vmesh]
+inherit = 'debug'
+security_groups = ['default', 'Cluster'] ; public access via port 22, inter-Cluster access on all ports
+
+# where to get the code, and what it's called
+bucket = 'vgp'
+egg_file_name = 'vmesh.egg'
+package_name = 'vmesh'
+
+### --- Configuration: spot (spot version of vmesh) --- ###
+[spot]
+inherit = 'vmesh'
+spot_instances = True
+persistent = False
+price = 0.04
+
+### --- Configuration: bare (just start a bare instance) --- ###
+[bare]
+inherit = 'base'
+bare = True
+key_pair = 'cdk11744-nix' ; no cloud-init, so specify key here
+
+
