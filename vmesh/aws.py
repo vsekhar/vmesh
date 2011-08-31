@@ -15,7 +15,8 @@ class AWS:
 		elif conf.has_option('vmesh', 'node_access_key') and conf.has_option('vmesh', 'node_secret_key'):
 			self.metadata = boto.utils.get_instance_metadata()
 			self.sdb = boto.connect_sdb(conf.get('vmesh', 'node_access_key'), conf.get('vmesh', 'node_secret_key'))
-			self.s3 = boto.connect_s3(conf.get('vmesh', 'node_access_key'), conf.get('vmesh', 'node_secret_key'))
+			self.s3 = boto.connect_s3(aws_access_key_id=conf.get('vmesh', 'node_access_key')
+									, aws_secret_access_key=conf.get('vmesh', 'node_secret_key'))
 		else:
 			raise RuntimeError('Need access_key and secret_key for non-local execution')
 
