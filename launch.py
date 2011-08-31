@@ -63,20 +63,20 @@ if __name__ == '__main__':
 	# packagename = launch.get_arg('package_name')
 	eggfilename = launch.get_arg('egg_file_name')
 
-	# build the egg
-	old_argv = sys.argv # trick setup into thinking it was executed at the command line
-	sys.argv = ['setup.py', '-q', 'bdist_egg']
-	dist = setup.run()
-	egg_path = os.path.join('dist', dist.get_fullname())
-	egg_path += '-py%d.%d.egg' % (sys.version_info[0], sys.version_info[1])
-
-	# slipstream credentials into config file and assemble mime-multipart
+	# slipstream credentials into config file
 	from launch.include import load_with_includes
 	passthrough = ['node_access_key', 'node_secret_key', 'bucket', 'egg_file_name', 'package_name']
 	config = load_with_includes('vmesh-config.txt', passthrough=passthrough)
 	if launch.get_arg('config_only'):
 		print config
 		sys.exit(0)
+
+	# build the egg
+	old_argv = sys.argv # trick setup into thinking it was executed at the command line
+	sys.argv = ['setup.py', '-q', 'bdist_egg']
+	dist = setup.run()
+	egg_path = os.path.join('dist', dist.get_fullname())
+	egg_path += '-py%d.%d.egg' % (sys.version_info[0], sys.version_info[1])
 
 	# upload the egg
 	b = launch.s3.get_bucket(bucketname)
