@@ -106,7 +106,11 @@ if __name__ == '__main__':
 		command += ' parthandler.py'
 		command += ' %s:text/vmesh-config' % configfile.name
 		p = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE)
-		user_data = p.stdout.read()
+		out, err = p.communicate()
+		if p.returncode != 0 or err is not None:
+			print >> sys.stderr, err
+			print out
+			print >> sys.stderr, 'write-mime-multipart return code: %d' % p.returncode
 
-	print launch_remote(user_data)
+	print launch_remote(out)
 
