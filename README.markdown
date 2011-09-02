@@ -17,3 +17,6 @@ Run locally:
  * Create local config file using `launch.py -c <config_name> --config-only > config`
  * Run with `twistd -n vmesh -ldc config`
 
+Run remotely:
+ * Run `./launch.py -c <config_name> [-n <num_instances>]
+
