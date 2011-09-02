@@ -9,6 +9,7 @@ from ConfigParser import NoOptionError, NoSectionError
 # command line
 parser = argparse.ArgumentParser(description='cloudlaunch.py: launch scripts in the cloud')
 parser.add_argument('-l', '--local', default=False, action='store_true', help='run locally')
+parser.add_argument('-d', '--debug', default=argparse.SUPPRESS, action='store_true', help='run in debug mode (more output)')
 parser.add_argument('-b', '--bare', default=argparse.SUPPRESS, action='store_true', help='launch bare instances only (no initial config)')
 parser.add_argument('--config-only', default=False, action='store_true', help='merge and output config file, then exit')
 parser.add_argument('-u', '--upload-only', default=False, action='store_true', help='upload the package, then exit')
@@ -16,8 +17,10 @@ parser.add_argument('-f', '--config-file', default=None, help='config file to us
 parser.add_argument('-c', '--configuration', default='DEFAULT', help='configuration name in config file (default=\'DEFAULT\')')
 parser.add_argument('--list-configurations', default=False, action='store_true', help='list configurations, then exit')
 parser.add_argument('-n', '--count', default=argparse.SUPPRESS, help='number of nodes to start')
-# parser.add_argument('-d', '--debug', default=False, action='store_true', help='run in debug mode (more output)')
 _args = parser.parse_args()
+
+# binary arguments (arguments that can appear in the commandline or config) and their defaults
+bin_defs = [('debug', False), ('bare', False), ('count', 1)]
 
 # configuration file
 if not _args.config_file:
@@ -63,4 +66,10 @@ def get(name, section=None):
 	except AttributeError:
 		global config
 		return parse(config.get(section or _args.configuration, name))
+
+for arg, default in bin_defs:
+	try:
+		get(arg)
+	except NoOptionError:
+		setattr(_args, arg, default)
 

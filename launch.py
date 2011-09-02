@@ -11,6 +11,24 @@ import boto
 import launch
 import setup
 
+def launch_local(config):
+	with tempfile.NamedTemporaryFile(mode='w+t') as configfile:
+		configfile.write(config)
+		configfile.flush()
+		configfile.seek(0)
+		command = 'twistd -n vmesh --local'
+		if launch.get_arg('debug'):
+			command += ' --debug'
+		command += ' --config-file ' + configfile.name
+		print 'Launching with command: %s' % command
+		try:
+			p = subprocess.Popen(shlex.split(command))
+			p.wait()
+		except KeyboardInterrupt:
+			pass
+		finally:
+			return p.returncode
+
 def launch_remote(user_data):
 	import StringIO, gzip
 	from contextlib import closing
@@ -51,11 +69,7 @@ def launch_bare():
 
 
 if __name__ == '__main__':
-	try:
-		bare = launch.get_arg('bare')
-	except launch.args.NoOptionError:
-		bare = False
-	if bare:
+	if launch.get_arg('bare'):
 		print launch_bare()
 		sys.exit(0)
 
@@ -70,6 +84,10 @@ if __name__ == '__main__':
 	if launch.get_arg('config_only'):
 		print config
 		sys.exit(0)
+
+	if launch.get_arg('local'):
+		ret = launch_local(config)
+		sys.exit(ret)
 
 	# build the egg
 	old_argv = sys.argv # trick setup into thinking it was executed at the command line
