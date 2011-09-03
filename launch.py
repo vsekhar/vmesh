@@ -130,6 +130,7 @@ if __name__ == '__main__':
 			print >> sys.stderr, err
 			print out
 			print >> sys.stderr, 'write-mime-multipart return code: %d' % p.returncode
+			sys.exit(1)
 
 	print launch_remote(out)
 
