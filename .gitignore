@@ -15,9 +15,6 @@
 *~
 temp/
 
-# local config
-config
-
 # 'compiled' files and directories
 *.egg-info
 dist/
