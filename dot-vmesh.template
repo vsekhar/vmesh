@@ -16,7 +16,7 @@ node_secret_key = 'ABC123'
 
 ### --- Configuration: base (basic settings (1 small on-demand instance)) --- ###
 [base]
-ami = 'ami-e2af508b' ; Ubuntu 11.04 Natty Server 32-bit us-east-1
+ami = 'ami-3962a950' ; Ubuntu 11.10 Oneiric Server 32-bit us-east-1 instance store
 instance_type = 'm1.small'
 security_groups = ['default'] ; port 22
 count = 1 ; can be overridden at command line
@@ -26,7 +26,7 @@ key_pair = '' ; usually provided in cloud-config file
 ### --- Configuration: debug (provide a key in case cloud-init fails) --- ###
 [debug]
 inherit = 'base'
-key_pair = 'cdk11744-nix'
+key_pair = 'cdk11746-nix'
 
 ### --- Configuration: vmesh --- ###
 [vmesh]
