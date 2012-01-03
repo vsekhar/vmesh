@@ -35,6 +35,7 @@ class KernelService(IntervalService, object):
 		self.superservice = superservice
 		self.options = superservice.options
 		self.config = superservice.config
+		self._msgs = False
 
 		self.addInterval(self.mgmt)
 
@@ -42,5 +43,12 @@ class KernelService(IntervalService, object):
 		self.outgoing_queue = multiprocessing.Queue()
 
 	def mgmt(self):
-		pass
+		if self._msgs:
+			random_mgmt(self.incoming_queue, self.outgoing_queue)
+
+	def start_msgs(self):
+		self._msgs = True
+
+	def stop_msgs(self):
+		self._msgs = False
 

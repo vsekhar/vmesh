@@ -5,6 +5,7 @@ import sys
 import os
 import tempfile
 import subprocess
+from contextlib import closing
 
 import boto
 
@@ -16,7 +17,7 @@ def launch_local(config):
 		configfile.write(config)
 		configfile.flush()
 		configfile.seek(0)
-		command = 'twistd -n vmesh --local'
+		command = 'twistd -n  --prefix vmesh vmesh --local'
 		if local.get_arg('debug'):
 			command += ' --debug'
 		command += ' --config-file ' + configfile.name
@@ -108,7 +109,8 @@ if __name__ == '__main__':
 	def report_progress(at, total):
 		print '\r%d%%' % ((at/total)*100),
 		sys.stdout.flush()
-	k.set_contents_from_file(open(egg_path, mode='rb'), cb=report_progress)
+	with closing(open(egg_path, mode='rb')) as egg:
+		k.set_contents_from_file(egg, cb=report_progress)
 	print ' done'
 
 	if local.get_arg('upload_only'):
@@ -124,9 +126,9 @@ if __name__ == '__main__':
 		command += ' vmesh-job'
 		command += ' parthandler.py'
 		command += ' %s:text/vmesh-config' % configfile.name
-		p = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE)
+		p = subprocess.Popen(shlex.split(command), stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 		out, err = p.communicate()
-		if p.returncode != 0 or err is not None:
+		if p.returncode != 0 or err != '':
 			print >> sys.stderr, err
 			print out
 			print >> sys.stderr, 'write-mime-multipart return code: %d' % p.returncode

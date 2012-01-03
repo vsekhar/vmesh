@@ -3,7 +3,8 @@
 #
 
 [local]
-# credentials for local use (if commented out, local boto default credentials are used)
+# credentials for local use (these keys are not sent to nodes)
+# NB: if commented out, local boto default credentials are used
 #local_access_key = 'ABCD1234'
 #local_secret_key = '9876eA4'
 

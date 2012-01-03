@@ -19,8 +19,9 @@ parser.add_argument('--list-configurations', default=False, action='store_true',
 parser.add_argument('-n', '--count', default=argparse.SUPPRESS, help='number of nodes to start')
 _args = parser.parse_args()
 
-# binary arguments (arguments that can appear in the commandline or config) and their defaults
-bin_defs = [('debug', False), ('bare', False), ('count', 1)]
+# deferred defaults for binary arguments that can appear in the commandline,
+# config or neither
+deferred_defs = [('debug', False), ('bare', False)]
 
 # configuration file
 if not _args.config_file:
@@ -67,7 +68,8 @@ def get(name, section=None):
 		global config
 		return parse(config.get(section or _args.configuration, name))
 
-for arg, default in bin_defs:
+# set deferred defaults
+for arg, default in deferred_defs:
 	try:
 		get(arg)
 	except NoOptionError:
