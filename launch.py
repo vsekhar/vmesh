@@ -7,8 +7,6 @@ import tempfile
 import subprocess
 from contextlib import closing
 
-import boto
-
 import local
 import setup
 
@@ -31,9 +29,6 @@ def launch_local(config):
 			return p.returncode
 
 def launch_remote(user_data):
-	import StringIO, gzip
-	from contextlib import closing
-
 	if local.get_arg('spot_instances'):
 		requests = local.ec2.request_spot_instances(
 								price=local.get_arg('price'),
@@ -100,7 +95,7 @@ if __name__ == '__main__':
 	# upload the egg
 	b = local.s3.get_bucket(bucketname)
 	if not b:
-		b = s3.create_bucket(bucketname)
+		b = local.s3.create_bucket(bucketname)
 	k = b.get_key(eggfilename)
 	if not k:
 		k = b.new_key(eggfilename)

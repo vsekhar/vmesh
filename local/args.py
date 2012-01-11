@@ -1,10 +1,9 @@
 
-import sys
 import os
 import argparse
 from ast import literal_eval as parse
 import ConfigParser
-from ConfigParser import NoOptionError, NoSectionError
+from ConfigParser import NoOptionError
 
 # command line
 parser = argparse.ArgumentParser(description='cloudlaunch.py: launch scripts in the cloud')
