@@ -10,7 +10,7 @@ script
 
 # install some stuff
 easy_install ampoule
-easy_install /var/lib/vmesh/vmesh.egg
+easy_install /var/lib/vmesh/vmesh.egg # the egg is placed here by part handler
 
 # update the twisted plugin index
 python <<EOF
